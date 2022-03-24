@@ -20,8 +20,7 @@ interface ScreenContextValue {
   setOptions: (opts: Partial<ScreenContextState>) => void
 }
 
-// tslint:disable-next-line: no-empty
-const ScreenContext = createContext<ScreenContextValue>({ options: {}, setOptions: () => {} })
+const ScreenContext = createContext<ScreenContextValue>(null!)
 
 const ScreenWrapper = ({ children }: { children?: React.ReactNode }) => {
   const [options, setOptions] = useState<ScreenContextState>({})
