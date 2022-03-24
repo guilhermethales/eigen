@@ -198,6 +198,11 @@ export const features = defineFeatures({
     description: "Enable My Collection Price Estimate Range",
     showInAdminMenu: true,
   },
+  AREnablePersistantCaching: {
+    readyForRelease: false,
+    description: "Enable new caching",
+    showInAdminMenu: false,
+  },
 })
 
 export interface DevToggleDescriptor {

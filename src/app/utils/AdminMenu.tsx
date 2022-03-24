@@ -5,7 +5,7 @@ import { useToast } from "app/Components/Toast/toastHook"
 import { eigenSentryReleaseName } from "app/errorReporting/sentrySetup"
 import { ArtsyNativeModule } from "app/NativeModules/ArtsyNativeModule"
 import { dismissModal, navigate } from "app/navigation/navigate"
-import { RelayCache } from "app/relay/RelayCache"
+import { clearRelayCache } from "app/relay/createEnvironment"
 import { environment, EnvironmentKey } from "app/store/config/EnvironmentModel"
 import { DevToggleName, devToggles, FeatureName, features } from "app/store/config/features"
 import { GlobalStore } from "app/store/GlobalStore"
@@ -24,12 +24,13 @@ import {
   useColor,
 } from "palette"
 import React, { useEffect, useState } from "react"
-import { Button as RNButton, NativeModules } from "react-native"
 import {
   Alert,
   AlertButton,
   BackHandler,
+  Button as RNButton,
   DevSettings,
+  NativeModules,
   Platform,
   ScrollView,
   TouchableHighlight,
@@ -124,6 +125,15 @@ export const AdminMenu: React.FC<{ onClose(): void }> = ({ onClose = dismissModa
         {configurableFeatureFlagKeys.map((flagKey) => {
           return <FeatureFlagItem key={flagKey} flagKey={flagKey} />
         })}
+        <FeatureFlagItem
+          flagKey="AREnablePersistantCaching"
+          onPress={() => {
+            setTimeout(() => {
+              onClose()
+              DevSettings.reload()
+            }, 2000)
+          }}
+        />
         <Flex mx="2">
           <Separator my="1" />
         </Flex>
@@ -174,7 +184,9 @@ export const AdminMenu: React.FC<{ onClose(): void }> = ({ onClose = dismissModa
         <FeatureFlagMenuItem
           title="Clear Relay Cache"
           onPress={() => {
-            RelayCache.clearAll()
+            clearRelayCache?.()
+            onClose()
+            requestAnimationFrame(() => DevSettings.reload())
           }}
         />
         <FeatureFlagMenuItem
@@ -223,7 +235,7 @@ const Buttons: React.FC<{ onClose(): void }> = ({ onClose }) => {
         <>
           <TouchableOpacity
             onPress={() => {
-              RelayCache.clearAll()
+              clearRelayCache?.()
               onClose()
               requestAnimationFrame(() => DevSettings.reload())
             }}
@@ -242,7 +254,10 @@ const Buttons: React.FC<{ onClose(): void }> = ({ onClose }) => {
   )
 }
 
-const FeatureFlagItem: React.FC<{ flagKey: FeatureName }> = ({ flagKey }) => {
+const FeatureFlagItem: React.FC<{ flagKey: FeatureName; onPress?: () => void }> = ({
+  flagKey,
+  onPress,
+}) => {
   const config = GlobalStore.useAppState((s) => s.artsyPrefs)
   const currentValue = config.features.flags[flagKey]
   const isAdminOverrideInEffect = flagKey in config.features.adminOverrides
@@ -261,6 +276,7 @@ const FeatureFlagItem: React.FC<{ flagKey: FeatureName }> = ({ flagKey }) => {
                 key: flagKey,
                 value: true,
               })
+              onPress?.()
             },
           },
           {
@@ -270,6 +286,7 @@ const FeatureFlagItem: React.FC<{ flagKey: FeatureName }> = ({ flagKey }) => {
                 key: flagKey,
                 value: false,
               })
+              onPress?.()
             },
           },
           {
@@ -279,6 +296,7 @@ const FeatureFlagItem: React.FC<{ flagKey: FeatureName }> = ({ flagKey }) => {
                 key: flagKey,
                 value: null,
               })
+              onPress?.()
             },
             style: "destructive",
           },
