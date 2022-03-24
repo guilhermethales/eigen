@@ -12,3 +12,9 @@ export const Spacer: React.FC<SpacerProps & { id?: string }> = ({ x, y, ...props
 }
 
 Spacer.displayName = "Spacer"
+
+// move to attoms and export
+/// add storybooks for everything
+
+/// headers
+/// rails

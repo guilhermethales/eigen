@@ -1,4 +1,6 @@
 export * from "./atoms"
+export * from "./molecules"
+export * from "./organisms"
 export * from "./elements"
 export * from "./helpers"
 export * from "./svgs"
